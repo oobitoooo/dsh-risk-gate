@@ -103,6 +103,16 @@ check('pip install 被拦', (await pre('pwsh', { command: 'pip install requests'
 check('ssh 外连被拦', (await pre('pwsh', { command: 'ssh root@1.2.3.4' })).kind === 'deny')
 check('run_code 起子进程被拦', (await pre('run_code', { code: 'require("child_process").execSync("whoami")' })).kind === 'deny')
 check('写 hosts 被拦', (await pre('write', { file_path: 'C:\\Windows\\System32\\drivers\\etc\\hosts', content: 'x' })).kind === 'deny')
+// R9 只判「删除目标」，不因为命令里引用了 Program Files 里的程序就整条拦
+const mixed = await pre('pwsh', {
+  command: [
+    `Remove-Item "${path.join(home, 'tmp', 'a.md')}" -Force`,
+    '& "C:\\Program Files\\Git\\cmd\\git.exe" -C . rev-parse --short HEAD',
+  ].join('\n'),
+})
+check('删临时文件 + 引用 Program Files 里的 git → 放行', mixed.kind === 'allow', String(mixed.reason || '').split('\n')[0])
+check('只调用 Program Files 里的程序（无删除）→ 放行', (await pre('pwsh', { command: '& "C:\\Program Files\\Git\\cmd\\git.exe" -C . rev-parse HEAD' })).kind === 'allow')
+check('删 Program Files 里的文件 → 拦', (await pre('pwsh', { command: 'Remove-Item -Force "C:\\Program Files\\someapp\\a.dll"' })).kind === 'deny')
 check('写工作区放行', (await pre('write', { file_path: path.join(home, 'note.md'), content: 'x' })).kind === 'allow')
 check('链式拼接里夹带删除仍被拦', (await pre('pwsh', { command: 'git status; Remove-Item -Recurse .\\x' })).kind === 'deny')
 
