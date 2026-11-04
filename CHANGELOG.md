@@ -2,6 +2,18 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
+## [1.0.1] — 2026-11-04
+
+修两处误报（都是「读操作/正文提及被当成高危动作」）：
+
+### Fixed
+
+- **R3 把读取 hosts 当成写入**：原来只要命令里出现 `drivers\etc\hosts` 就拦，连 `Select-String`、`Get-Content` 都算。现在只有写入动词（`>`, `>>`, `Set-Content`, `Add-Content`, `Out-File`, `Copy-Item`, `Move-Item`, `Remove-Item`, `New-Item`, `Rename-Item`）后面跟 hosts 才拦。
+- **R5 把任意正文里的 ssh 当成外连**：`\bssh\b` 会命中 `.ssh` 路径和“SSH 私钥”这类说明文字。现在要求出现在**命令位置**（行首或 `;` / `&` / `|` 之后）才算。
+- **R5 把只读 REST 调用当成外发**：裸 `Invoke-RestMethod`（默认 GET）也被拦。现在只有带 `-Method POST/PUT/DELETE/PATCH` 或 `-Body` 才算外发。
+
+回归：`smoke 33/33`、`livecheck 20/20`。
+
 ## [1.0.0] — 2026-11-04
 
 首个可发布版本。
