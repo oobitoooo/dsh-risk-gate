@@ -1,0 +1,16 @@
+# ============================================================================
+# dsh-risk-gate —— 高危操作确认闸门 bundle patch
+# ============================================================================
+# 本文件是插件的挂载声明：DSH 启动时按 bundle 层栈叠加，把闸门插入当前 profile。
+# 闸门只做一件事：命中高危规则时 deny，并把「确认编号」交给模型转述给你；
+# 你回复「确认 <编号>」之后，同一条调用才会放行。其余破甲行为不受影响。
+#
+# 安装 / 修复：powershell -ExecutionPolicy Bypass -File scripts\install.ps1
+# 卸载：      powershell -ExecutionPolicy Bypass -File scripts\uninstall.ps1
+# 改规则：    %USERPROFILE%\.dsh\risk-gate\policy.json （改完无需重启，热读）
+# ============================================================================
+
+- insert:
+    - id: dsh-risk-gate
+      name: 'dsh-risk-gate'
+      inject: [tools, systemPrompt]

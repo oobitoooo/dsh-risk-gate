@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [18, 20, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Syntax check
+        run: node --check lib/index.js
+      - name: Smoke test
+        run: node test/smoke.mjs
+      - name: Live policy check (defaults)
+        run: node scripts/livecheck.mjs
+        env:
+          DSH_HOME: ${{ runner.temp }}/dsh-home
+      - name: Build tarball
+        run: node scripts/pack.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dsh-risk-gate-${{ matrix.os }}-node${{ matrix.node }}
+          path: dsh-risk-gate-*.tgz
+          if-no-files-found: error
