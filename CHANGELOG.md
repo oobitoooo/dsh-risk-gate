@@ -2,6 +2,15 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
+## [1.0.2] — 2026-11-04
+
+### Fixed
+
+- **R9 只看删除目标**：原来只要命令里出现 `C:\Program Files\…`、`C:\Windows\…` 这类路径，并且同一个命令里有任何删除动作，就整条判高危——哪怕那只是 `& "C:\Program Files\Git\cmd\git.exe" …` 在调用程序。现在新增 `deleteTargets()`，只解析 `Remove-Item / rm / del / rmdir / rd` 后面的**操作数**，再判断它是否落在保护路径里。
+- 连带修正：R1 的「工作区内小目录免确认」也改用同一套删除目标解析，避免路过的路径被误当成删除目标。
+
+回归：`smoke 36/36`（新增 3 条：删临时文件+引用 Program Files 的 git、只调用 Program Files、删 Program Files 里的文件）、`livecheck 20/20`。
+
 ## [1.0.1] — 2026-11-04
 
 修两处误报（都是「读操作/正文提及被当成高危动作」）：
