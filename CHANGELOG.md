@@ -2,6 +2,16 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
+## [1.2.1] — 2026-11-05
+
+同步发布：把仓库里的文档修正（`docs/PUBLISH.md` 的资产上传坑、tag 挪动说明）打进发行包，并修掉一处审计噪音。
+
+### Fixed
+
+- 同一条用户消息会经 `agent/pre-step` 与 `agent/inbox/inserted` 各触发一次，导致「授权」审计写两行。现在 2 秒内同文本只处理一次。
+
+回归：`smoke 46/46`、`livecheck 20/20`。
+
 ## [1.2.0] — 2026-11-05
 
 ### Added

@@ -144,6 +144,15 @@ await userSays('取消授权')
 check('取消授权后再次拦截', (await pre('pwsh', { command: 'git push origin main' })).kind === 'deny')
 check('授权时长上限 120 分钟', mod.parseGrant('授权 999 分钟').minutes === 120)
 check('普通文本不触发授权', mod.parseGrant('这次别授权').minutes === 0)
+
+// 同一条消息经 pre-step 与 inbox 各来一次，只应记一次授权
+const auditPath = path.join(home, 'risk-gate', 'audit.jsonl')
+const countGrants = () => fs.readFileSync(auditPath, 'utf8').split('\n').filter((line) => line.includes('"grant"')).length
+const beforeGrant = countGrants()
+await userSays('授权 3 分钟')
+handlers.get('agent/inbox/inserted')({ agent: { id: 'A1' }, message: { role: 'user', content: '授权 3 分钟' } })
+check('同一条消息只记一次授权', countGrants() - beforeGrant === 1)
+await userSays('取消授权') // 收尾：别让授权窗口影响后面的拦截用例
 check('写工作区放行', (await pre('write', { file_path: path.join(home, 'note.md'), content: 'x' })).kind === 'allow')
 check('链式拼接里夹带删除仍被拦', (await pre('pwsh', { command: 'git status; Remove-Item -Recurse .\\x' })).kind === 'deny')
 
