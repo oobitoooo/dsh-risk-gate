@@ -178,6 +178,8 @@ const tamperCheck = mod.verifyAuditChain(tampered, chainKey)
 check('篡改任意一行会被检出', tamperCheck.ok === false)
 const wrongKey = mod.verifyAuditChain(auditLines, Buffer.from('0'.repeat(32)))
 check('换错密钥也会校验失败', wrongKey.ok === false)
+const checkpointPath = path.join(home, 'risk-gate', 'chain.checkpoint.json')
+check('每次写审计都更新 checkpoint', fs.existsSync(checkpointPath) && JSON.parse(fs.readFileSync(checkpointPath, 'utf8')).count > 0)
 
 check('风险分级：高于阈值拦截', mod.riskDecision(9, { block: 7, warn: 4 }) === 'block')
 check('风险分级：中风险只告警', mod.riskDecision(5, { block: 7, warn: 4 }) === 'warn')

@@ -2,6 +2,14 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
+## [1.3.1] — 2026-11-05
+
+### Fixed
+
+- **尾部截断检不出来**：checkpoint 原先每 20 行才写一次，链很短时（例如刚装完只有几行）删掉末尾几条再校验仍是 `ok: true`。现在每写一条审计就更新 `chain.checkpoint.json`，`risk_gate action=verify` 会用 `truncated` 字段报出截断。
+
+回归：`smoke 62/62`。
+
 ## [1.3.0] — 2026-11-05
 
 借鉴同期项目的三处设计（详见 [docs/CREDITS.md](docs/CREDITS.md)）。
