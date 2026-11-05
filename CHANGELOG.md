@@ -2,13 +2,15 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
-## [1.1.0] — 2026-11-05
+## [1.1.1] — 2026-11-05
 
-文档与可用性补齐，外加一处匹配修正。
+文档与可用性补齐，外加两处**误拦**修正。
 
 ### Fixed
 
-- **here-string 里的字面文本不再参与规则匹配**：发布说明、文档片段里常出现示例命令（如 `dsh plugin add …`、`Remove-Item -Recurse …`），原先会被当成真动作误拦。现在先把 `@"…"@` / `@'…'@` 替换成占位符再匹配。普通引号**不**剥离——`powershell -Command "Remove-Item -Recurse …"` 那种里层是真要执行的。
+- **here-string 里的字面文本不再参与规则匹配**：发布说明、文档片段里常出现示例命令（如 `dsh plugin add …`、`Remove-Item -Recurse …`），原先会被当成真动作误拦。现在按 PowerShell 的真实语法逐行解析，把 `@"…"@` / `@'…'@` 整段替换成占位符再匹配。
+- **正文里的字面量 `@"…"@` 不再让 here-string 提前闭合**：第一版用一条正则一把梭，遇到“文档里写了 `@"…"@` 这个语法”就会在那里闭合，后半段内容漏出来继续被当成命令（真实踩过）。现在只有**单独一行**的 `"@` / `'@` 才算结束。
+- 普通引号**不**剥离：`powershell -Command "Remove-Item -Recurse …"` 里层仍然会被拦。
 
 ### Added
 
@@ -22,6 +24,8 @@ All notable changes to this project. Format loosely follows Keep a Changelog; ve
 ### Changed
 
 - npm 包内新增 `examples/`、`CONTRIBUTING.md`、`docs/`（此前 docs 只在仓库里）。
+
+回归：`smoke 39/39`、`livecheck 20/20`。
 
 ## [1.0.2] — 2026-11-04
 

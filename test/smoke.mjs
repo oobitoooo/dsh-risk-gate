@@ -122,6 +122,16 @@ const hereDoc = [
   'Write-Output $notes',
 ].join('\n')
 check('here-string 里的示例命令不触发拦截', (await pre('pwsh', { command: hereDoc })).kind === 'allow')
+// 正文里出现字面量 @"…"@ 不能把 here-string 提前闭合（真实踩过的坑）
+const tricky = [
+  '$notes = @"',
+  '示例： dsh plugin --profile desktop add x.tgz',
+  '写法说明： @"…"@ 就是这个语法',
+  '示例删除： Remove-Item -Recurse -Force C:\\nope',
+  '"@',
+  'Write-Output $notes',
+].join('\n')
+check('here-string 正文里的 @"…"@ 不会提前闭合', (await pre('pwsh', { command: tricky })).kind === 'allow')
 check('here-string 外的真命令仍然拦', (await pre('pwsh', { command: 'Remove-Item -Recurse -Force C:\\nope' })).kind === 'deny')
 check('写工作区放行', (await pre('write', { file_path: path.join(home, 'note.md'), content: 'x' })).kind === 'allow')
 check('链式拼接里夹带删除仍被拦', (await pre('pwsh', { command: 'git status; Remove-Item -Recurse .\\x' })).kind === 'deny')
