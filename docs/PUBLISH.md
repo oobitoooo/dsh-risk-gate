@@ -33,6 +33,28 @@ node scripts\pack.mjs      # 生成 dsh-risk-gate-1.0.0.tgz
 - 上传 `dsh-risk-gate-1.0.0.tgz`
 - Release notes 直接抄 `CHANGELOG.md` 的 1.0.0 段
 
+### 用 API 传资产的两个坑（都踩过）
+
+```sh
+# ✅ 正确：二进制直传
+curl -X POST -H "Authorization: token $TOKEN" -H "Content-Type: application/gzip" \
+     --data-binary "@dsh-risk-gate-1.2.0.tgz" \
+     "https://uploads.github.com/repos/<owner>/<repo>/releases/<id>/assets?name=dsh-risk-gate-1.2.0.tgz"
+
+# ❌ 错误：-F 是 multipart，GitHub 会把整个报文（含 --boundary）当成资产
+curl -X POST ... -F "file=@dsh-risk-gate-1.2.0.tgz" ...
+```
+
+自检：下载回来读头两字节，应是 `31,139`（gzip），不是 `45,45`（`--`）。
+
+GitHub 自动建的 tag 指向**建 Release 时的 main**；之后又推了提交的话，把 tag 挪过去：
+
+```sh
+curl -X PATCH -H "Authorization: token $TOKEN" -H "Content-Type: application/json" \
+     -d '{"sha":"<new-sha>","force":true}' \
+     https://api.github.com/repos/<owner>/<repo>/git/refs/tags/v1.2.0
+```
+
 装的时候用固定 URL：
 
 ```sh
