@@ -11,7 +11,7 @@
     {
       "id": "R2",
       "label": "写远端 / 改写仓库历史",
-      "flags": "i",
+      "flags": "im",
       "pattern": "\\bgit\\s+push\\b|\\bgit\\s+reset\\s+--hard\\b|\\bgit\\s+clean\\s+-[a-z]*f|\\bgit\\s+remote\\s+(add|remove|set-url)\\b|\\bgit\\s+filter-branch\\b|\\bgh\\s+release\\s+(create|delete)\\b|\\bgh\\s+repo\\s+delete\\b"
     },
     {

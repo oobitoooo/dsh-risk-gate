@@ -60,6 +60,23 @@ tools/pre-execute → 命中规则 → 生成/复用编号 → deny（reason 里
 - 含 `;` `|` `&&` 拼接的命令**不享受例外**（防 `git status; rm -rf .\src` 夹带）；
 - 相对路径按工具调用的 `workdir` 解析——宿主进程的 `process.cwd()` 不是用户工作区。
 
+## R2 为什么不能只靠正则
+
+R2 最初只写了 `\bgit\s+push\b`，结果真实使用里 **一次都没命中**：
+
+```powershell
+$git = "C:\Program Files\Git\cmd\git.exe"
+& $git -C $repo push -u origin main     # 命令里没有 "git push" 这个字面量
+```
+
+审计日志里 R2 计数长期为 0，而 push 已经做了好几次——正则匹配的是**文本**，人写的是**调用**。
+
+修法是加一层词法判定 `looksLikeGitPush()`：把命令切成 token（引号内的空格保留，`; | &` 当分隔符），找到 `git` / `git.exe` / `$变量`，跳过带值的选项（`-C` `-c` `--git-dir` …），再看后面第一个裸词是不是 `push`。
+
+- 只留正则会把 `& $git … push`、`git.exe … push`、`git --no-pager push` 全漏掉；
+- 但把「& $变量 … 出现 push」直接写进正则又太宽——`& $node x.mjs | Select-String -Pattern "…push"` 会被误拦（实测踩到）；
+- 所以正则只保留确定形态（字面量、命令位置上的裸 `push origin`），间接调用交给 token 层。
+
 ## 已知取舍
 
 - **正则不是语义分析**：拦的是命令文本，绕法存在（编码、间接调用）。真正的兜底是 `guard` 单调 + `audit.jsonl` 可追，而不是"保证 100% 拦截"。

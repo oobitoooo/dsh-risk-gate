@@ -11,7 +11,7 @@
     {
       "id": "R2",
       "label": "写远端 / 改写仓库历史",
-      "flags": "i",
+      "flags": "im",
       "pattern": "\\bgit\\s+push\\b|\\bgit\\s+reset\\s+--hard\\b|\\bgit\\s+clean\\s+-[a-z]*f|\\bgit\\s+remote\\s+(add|remove|set-url)\\b|\\bgh\\s+release\\s+(create|delete)\\b"
     },
     {
@@ -30,7 +30,9 @@
     "\\.credentials"
   ],
   "recursiveDelete": {
-    "allowRoots": ["C:\\path\\to\\your\\workspace"],
+    "allowRoots": [
+      "C:\\path\\to\\your\\workspace"
+    ],
     "maxEntries": 200,
     "useWorkdirAsRoot": false
   },

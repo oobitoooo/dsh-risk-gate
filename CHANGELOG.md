@@ -2,6 +2,18 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
+## [1.2.2] — 2026-11-05
+
+修 R2 的**结构性漏拦**：正则只认字面量 `git push`，而实际使用的 `& $git -C … push` 一次都没命中（审计里 R2 计数长期为 0）。
+
+### Fixed
+
+- 新增词法层 `looksLikeGitPush()`：切 token → 找 `git` / `git.exe` / `$变量` → 跳过带值选项（`-C` `-c` `--git-dir` …）→ 下一个裸词是 `push` 即命中。覆盖 `& $git … push`、`git.exe … push`、`$g push`、`git --no-pager push`。
+- R2 正则补 `(^|[;&|])\s*push\s+(?:-u\s+)?(?:origin|upstream)\b`（命令位置的裸 push），flags 改为 `im`。
+- **没有**采用「`& $var … push` 一律命中」的宽正则：实测会把 `& $node x.mjs | Select-String -Pattern "…push"` 误拦。
+
+回归：`smoke 52/52`（新增 6 条 R2 正反例）、`livecheck 20/20`。
+
 ## [1.2.1] — 2026-11-05
 
 同步发布：把仓库里的文档修正（`docs/PUBLISH.md` 的资产上传坑、tag 挪动说明）打进发行包，并修掉一处审计噪音。

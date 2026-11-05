@@ -66,6 +66,13 @@ check('read 任意文件放行', (await pre('read', { file_path: 'C:\\Windows\\w
 
 const push1 = await pre('pwsh', { command: 'git push origin main' })
 check('git push 被拦', push1.kind === 'deny', String(push1.reason || '').split('\n')[0])
+// R2 曾只认字面量 git push，下面这些间接写法一个都拦不住（真实漏拦）
+check('& $git … push 被拦', (await pre('pwsh', { command: '& $git -C "C:\\ws" push -u origin main' })).kind === 'deny')
+check('git.exe … push 被拦', (await pre('pwsh', { command: '& "C:\\Program Files\\Git\\cmd\\git.exe" -C . push' })).kind === 'deny')
+check('$g push 被拦（无 git 字面量）', (await pre('pwsh', { command: '$g push -u origin main' })).kind === 'deny')
+check('git --no-pager push 被拦', (await pre('pwsh', { command: 'git --no-pager push origin main' })).kind === 'deny')
+check('git log --grep push 不误拦', (await pre('pwsh', { command: 'git log --grep push' })).kind === 'allow')
+check('echo push origin 不误拦', (await pre('pwsh', { command: 'echo push origin' })).kind === 'allow')
 const code1 = (String(push1.reason).match(/确认\s+([0-9A-F]{8})/) || [])[1]
 check('拦截理由里带确认编号', Boolean(code1), code1)
 
