@@ -2,6 +2,23 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
+## [1.1.0] — 2026-11-05
+
+文档与可用性补齐（无行为变更，规则与 1.0.2 一致）。
+
+### Added
+
+- `docs/FAQ.md`：破甲为什么让审批失效、编号是不是密码、误拦怎么办、怎么彻底关掉、token 开销。
+- `docs/banner.svg` + README 徽章（CI / release / license / node）。
+- `examples/policy.strict.json`（递归删除一律确认、5 分钟过期）与 `examples/policy.relaxed.json`（`useWorkdirAsRoot`、500 条目上限）。
+- `.github/ISSUE_TEMPLATE/bug_report.yml`、`config.yml`、`PULL_REQUEST_TEMPLATE.md`。
+- `CONTRIBUTING.md`：改规则三条原则（只判操作数、不判提及、误报必须可关）、测试与发版流程。
+- README 增加「文档」索引；安装命令改用 `latest/download`。
+
+### Changed
+
+- npm 包内新增 `examples/`、`CONTRIBUTING.md`、`docs/`（此前 docs 只在仓库里）。
+
 ## [1.0.2] — 2026-11-04
 
 ### Fixed

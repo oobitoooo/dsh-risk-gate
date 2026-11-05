@@ -1,0 +1,59 @@
+{
+  "$comment": "宽松档：把工作区/项目根当作允许根（useWorkdirAsRoot），递归删除小目录不再问；只保留真正危险的动作。适合单人本机日常开发。",
+  "ttlMs": 1800000,
+  "rules": [
+    {
+      "id": "R1",
+      "label": "递归删除 / 格式化文件",
+      "flags": "i",
+      "pattern": "remove-item[^\\n]*-recurse|\\brm\\s+-rf\\b|\\bformat-volume\\b|\\bclear-disk\\b|shutil\\.rmtree|rimraf"
+    },
+    {
+      "id": "R2",
+      "label": "写远端 / 改写仓库历史",
+      "flags": "i",
+      "pattern": "\\bgit\\s+push\\b|\\bgit\\s+reset\\s+--hard\\b|\\bgit\\s+clean\\s+-[a-z]*f|\\bgit\\s+remote\\s+(add|remove|set-url)\\b"
+    },
+    {
+      "id": "R3",
+      "label": "改系统 / 服务 / 注册表 / 防火墙 / hosts",
+      "flags": "i",
+      "pattern": "\\breg\\s+(add|delete|import)\\b|\\bbcdedit\\b|\\bdiskpart\\b|\\bset-executionpolicy\\b|\\bset-mppreference\\b|\\bnew-netfirewallrule\\b|(set-content|add-content|copy-item|move-item|>|>>)[^\\n]*drivers[\\\\/]etc[\\\\/]hosts"
+    },
+    {
+      "id": "R5",
+      "label": "对外连接 / 数据外发 / 隧道",
+      "flags": "im",
+      "pattern": "(^|[;&|])\\s*(ssh|scp|nc|ncat|chisel|frpc|ngrok)\\s|invoke-webrequest[^\\n]*(-method\\s+post|-body)|invoke-restmethod[^\\n]*(-method\\s+post|-body)"
+    },
+    {
+      "id": "R6",
+      "label": "下载即执行 / 编码混淆",
+      "flags": "i",
+      "pattern": "\\|\\s*(iex|invoke-expression)\\b|downloadstring|-encodedcommand|frombase64string"
+    },
+    {
+      "id": "R8",
+      "label": "代码里起子进程",
+      "flags": "i",
+      "pattern": "child_process|subprocess\\.(run|popen|call)|os\\.system"
+    }
+  ],
+  "protectedRoots": [
+    "c:\\windows",
+    "c:\\program files",
+    "\\resources\\app",
+    "\\.ssh",
+    "\\.credentials"
+  ],
+  "recursiveDelete": {
+    "allowRoots": [],
+    "maxEntries": 500,
+    "useWorkdirAsRoot": true
+  },
+  "allow": [
+    "^\\s*git\\s+(status|diff|log|show|branch|add|commit|fetch|switch)\\b",
+    "^\\s*(ls|dir|pwd|cd)\\b",
+    "^\\s*(get-content|get-childitem|select-string|test-path|get-item|get-process)\\b"
+  ]
+}

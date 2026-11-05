@@ -1,4 +1,11 @@
+<p align="center"><img src="docs/banner.svg" alt="dsh-risk-gate" width="720"></p>
+
 # dsh-risk-gate
+
+[![ci](https://github.com/oobitoooo/dsh-risk-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/oobitoooo/dsh-risk-gate/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/oobitoooo/dsh-risk-gate)](https://github.com/oobitoooo/dsh-risk-gate/releases)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![node](https://img.shields.io/badge/node-%3E%3D18-339933.svg)](package.json)
 
 **给「破甲」补一道人肉闸门。** 一个 DSH（DeepSeek Harness）插件，通常与 [`dsh-purge`](https://github.com/kingcharleslzy-ai/dsh-purge) / purge-community 一起用。
 
@@ -47,9 +54,11 @@ return "allowed-once"; // 不再弹窗、不再 fail-closed
 **方式一：GitHub 直装（推荐）**
 
 ```sh
-dsh plugin --profile desktop add "https://github.com/oobitoooo/dsh-risk-gate/releases/latest/download/dsh-risk-gate-1.0.0.tgz"
+dsh plugin --profile desktop add "https://github.com/oobitoooo/dsh-risk-gate/releases/latest/download/dsh-risk-gate-1.1.0.tgz"
 # web profile 把 desktop 换成 web
 ```
+
+> 想钉死版本：把 `latest/download/` 换成 `download/v1.1.0/`。
 
 **方式二：本地 clone / link（开发用）**
 
@@ -162,6 +171,18 @@ powershell -ExecutionPolicy Bypass -File scripts\uninstall.ps1
 ```
 
 新会话里还可以直接问模型「跑一下 risk_gate status」——插件注册了 `risk_gate` 工具（`status / rules / pending / selftest / audit`）。
+
+## 文档
+
+| 文档 | 内容 |
+|---|---|
+| [docs/DESIGN.md](docs/DESIGN.md) | 为什么不走 approval、两条门（pre-execute + guard）、确认协议的设计取舍 |
+| [docs/FAQ.md](docs/FAQ.md) | 「为什么我的命令被拦了」「编号能被伪造吗」「怎么彻底关掉」等高频问题 |
+| [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) | 已验证宿主版本、依赖的宿主接口、与 purge 各补丁的对应关系 |
+| [docs/PUBLISH.md](docs/PUBLISH.md) | 自己发一版：改版本、打包、建 Release、进市场 |
+| [docs/FAQ.md#配置](docs/FAQ.md) · [examples/](examples/) | 严格档 / 宽松档两套现成策略 |
+| [SECURITY.md](SECURITY.md) | 威胁模型、覆盖与不覆盖、报告方式 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 改规则的三条原则（只判操作数、不判提及…）、测试与发版流程 |
 
 ## 边界（请务必读）
 

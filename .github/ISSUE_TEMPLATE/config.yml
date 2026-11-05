@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 使用问题 / 讨论
+    url: https://github.com/oobitoooo/dsh-risk-gate/discussions
+    about: 装不上、规则怎么写、某个动作该不该拦——先在这里问
+  - name: 上游项目
+    url: https://github.com/kingcharleslzy-ai/dsh-purge
+    about: 破甲本身的问题（补丁、面板、宿主适配）请去上游仓库

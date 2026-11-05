@@ -1,0 +1,50 @@
+name: Bug report
+description: 误拦、漏拦、装不上、面板/工具异常
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先看 [FAQ](https://github.com/oobitoooo/dsh-risk-gate/blob/main/docs/FAQ.md)；
+        贴日志前把令牌、`.env`、内网地址脱敏。
+  - type: input
+    id: versions
+    attributes:
+      label: 版本
+      description: DSH 版本 / 本插件版本（`risk_gate status` 或 `scripts\status.ps1` 里能看到）
+      placeholder: DSH 0.2.1-rc.5 / dsh-risk-gate 1.0.2
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 问题类型
+      options:
+        - 误拦（正常命令被要求确认）
+        - 漏拦（高危命令没被拦）
+        - 安装 / 装载失败
+        - 确认流程异常（回编号也不放行、编号过期太快）
+        - 其它
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: 触发问题的工具调用
+      description: 脱敏后的命令或调用参数
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望 vs 实际
+      placeholder: 期望放行，实际返回 [risk-gate] 已拦截：…（R5）
+    validations:
+      required: true
+  - type: textarea
+    id: audit
+    attributes:
+      label: 审计日志（可选）
+      description: '`~/.dsh/risk-gate/audit.jsonl` 里对应的几行，或 `boot.log` 的最后几行'
+      render: shell

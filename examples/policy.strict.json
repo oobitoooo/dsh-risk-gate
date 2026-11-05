@@ -1,0 +1,71 @@
+{
+  "$comment": "严格档：递归删除一律要确认（allowRoots 为空），确认编号 5 分钟过期，读类白名单只留最常用的几条。适合在别人机器/生产环境旁边跑。",
+  "ttlMs": 300000,
+  "rules": [
+    {
+      "id": "R1",
+      "label": "递归删除 / 格式化文件",
+      "flags": "i",
+      "pattern": "remove-item[^\\n]*-recurse|\\brm\\s+-[a-z]*(r[a-z]*f|f[a-z]*r)\\b|\\brm\\s+-rf\\b|\\brmdir\\s+/s|\\bdel\\s+/[fsq]|\\brd\\s+/s|\\bformat-volume\\b|\\bclear-disk\\b|\\binitialize-disk\\b|shutil\\.rmtree|\\bos\\.(remove|rmdir|unlink)\\b|\\bfs\\.(rm|rmdir|unlink)(sync)?\\s*\\(|rimraf"
+    },
+    {
+      "id": "R2",
+      "label": "写远端 / 改写仓库历史",
+      "flags": "i",
+      "pattern": "\\bgit\\s+push\\b|\\bgit\\s+reset\\s+--hard\\b|\\bgit\\s+clean\\s+-[a-z]*f|\\bgit\\s+remote\\s+(add|remove|set-url)\\b|\\bgit\\s+filter-branch\\b|\\bgh\\s+release\\s+(create|delete)\\b|\\bgh\\s+repo\\s+delete\\b"
+    },
+    {
+      "id": "R3",
+      "label": "改系统 / 服务 / 注册表 / 防火墙 / hosts",
+      "flags": "i",
+      "pattern": "\\bschtasks\\b|\\breg\\s+(add|delete|import|copy)\\b|\\bregedit\\b|\\bbcdedit\\b|\\bdiskpart\\b|\\bwmic\\b|\\bdism\\b|\\bsc\\s+(config|stop|delete|failure)\\b|\\bstop-service\\b|\\bset-service\\b|\\bnew-service\\b|\\bsc\\s+create\\b|\\bset-executionpolicy\\b|\\bset-mppreference\\b|\\badd-mppreference\\b|\\bset-netfirewall(profile|rule)\\b|\\bnew-netfirewallrule\\b|\\bnetsh\\s+(advfirewall|firewall|int\\s+ip|winsock)\\b|(set-content|add-content|out-file|copy-item|move-item|remove-item|new-item|ren|rename-item|>|>>)[^\\n]*drivers[\\\\/]etc[\\\\/]hosts|\\btakeown\\b|\\bicacls\\b"
+    },
+    {
+      "id": "R4",
+      "label": "装 / 卸全局软件或插件",
+      "flags": "i",
+      "pattern": "\\b(npm|pnpm|yarn)\\s+(i|install|add|rm|remove|uninstall)\\b[^\\n]*\\s(-g|--global)\\b|\\bwinget\\s+(install|uninstall|upgrade)\\b|\\bchoco\\s+(install|uninstall|upgrade)\\b|\\bscoop\\s+(install|uninstall|update)\\b|\\bpip3?\\s+install\\b|\\bdsh\\s+plugin\\b[^\\n]*\\s(add|remove)\\b|\\bpnpm\\s+add\\b[^\\n]*link:"
+    },
+    {
+      "id": "R5",
+      "label": "对外连接 / 数据外发 / 隧道",
+      "flags": "im",
+      "pattern": "(^|[;&|])\\s*(ssh|scp|sftp|plink|mstsc|ncat|socat|chisel|frpc|frps|ngrok|gost)\\s|\\bnc\\s+-|invoke-webrequest[^\\n]*(-method\\s+(post|put|delete|patch)|-body)|invoke-restmethod[^\\n]*(-method\\s+(post|put|delete|patch)|-body)|\\bcurl\\b[^\\n]*(-x\\s*(post|put|delete|patch)|--data|-d\\s)|\\biwr\\b[^\\n]*-method\\s+(post|put)"
+    },
+    {
+      "id": "R6",
+      "label": "下载即执行 / 编码混淆",
+      "flags": "i",
+      "pattern": "\\|\\s*(iex|invoke-expression)\\b|\\b(iex|invoke-expression)\\s*\\(|downloadstring|-encodedcommand|\\s-enc\\s|frombase64string|\\[convert\\]::frombase64string|base64\\s+-d"
+    },
+    {
+      "id": "R7",
+      "label": "强杀进程 / 提权",
+      "flags": "i",
+      "pattern": "\\bstop-process\\b[^\\n]*-force|\\btaskkill\\b[^\\n]*/f|\\bkill\\s+-9\\b|\\brunas\\s+/user|\\bpsexec\\b|\\bsudo\\b"
+    },
+    {
+      "id": "R8",
+      "label": "代码里起子进程",
+      "flags": "i",
+      "pattern": "child_process|subprocess\\.(run|popen|call|check_output)|os\\.(system|popen|execv)|pty\\.spawn"
+    }
+  ],
+  "protectedRoots": [
+    "c:\\windows",
+    "c:\\program files",
+    "c:\\programdata",
+    "\\resources\\app",
+    "\\.ssh",
+    "\\.credentials"
+  ],
+  "recursiveDelete": {
+    "allowRoots": [],
+    "maxEntries": 0,
+    "useWorkdirAsRoot": false
+  },
+  "allow": [
+    "^\\s*git\\s+(status|diff|log|show)\\b",
+    "^\\s*(ls|dir|pwd)\\b"
+  ]
+}
