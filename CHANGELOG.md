@@ -4,7 +4,11 @@ All notable changes to this project. Format loosely follows Keep a Changelog; ve
 
 ## [1.1.0] — 2026-11-05
 
-文档与可用性补齐（无行为变更，规则与 1.0.2 一致）。
+文档与可用性补齐，外加一处匹配修正。
+
+### Fixed
+
+- **here-string 里的字面文本不再参与规则匹配**：发布说明、文档片段里常出现示例命令（如 `dsh plugin add …`、`Remove-Item -Recurse …`），原先会被当成真动作误拦。现在先把 `@"…"@` / `@'…'@` 替换成占位符再匹配。普通引号**不**剥离——`powershell -Command "Remove-Item -Recurse …"` 那种里层是真要执行的。
 
 ### Added
 

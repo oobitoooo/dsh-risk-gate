@@ -113,6 +113,16 @@ const mixed = await pre('pwsh', {
 check('删临时文件 + 引用 Program Files 里的 git → 放行', mixed.kind === 'allow', String(mixed.reason || '').split('\n')[0])
 check('只调用 Program Files 里的程序（无删除）→ 放行', (await pre('pwsh', { command: '& "C:\\Program Files\\Git\\cmd\\git.exe" -C . rev-parse HEAD' })).kind === 'allow')
 check('删 Program Files 里的文件 → 拦', (await pre('pwsh', { command: 'Remove-Item -Force "C:\\Program Files\\someapp\\a.dll"' })).kind === 'deny')
+// here-string 里是字面数据（发布说明里贴了安装示例），不该被当成真动作
+const hereDoc = [
+  '$notes = @"',
+  'dsh plugin --profile desktop add "https://example.com/x.tgz"',
+  'Remove-Item -Recurse -Force C:\\nope',
+  '"@',
+  'Write-Output $notes',
+].join('\n')
+check('here-string 里的示例命令不触发拦截', (await pre('pwsh', { command: hereDoc })).kind === 'allow')
+check('here-string 外的真命令仍然拦', (await pre('pwsh', { command: 'Remove-Item -Recurse -Force C:\\nope' })).kind === 'deny')
 check('写工作区放行', (await pre('write', { file_path: path.join(home, 'note.md'), content: 'x' })).kind === 'allow')
 check('链式拼接里夹带删除仍被拦', (await pre('pwsh', { command: 'git status; Remove-Item -Recurse .\\x' })).kind === 'deny')
 
