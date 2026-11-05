@@ -2,6 +2,21 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
+## [1.2.0] — 2026-11-05
+
+### Added
+
+- **授权窗口（批量确认）**：用户回一句「授权 30 分钟」，窗口内高危操作直接放行，不再逐条要编号；上限 120 分钟，「取消授权」立即关闭。窗口内每次放行仍写 `audit.jsonl`（`decision: allow-by-grant` + 剩余分钟），`risk_gate status` 能看到剩余时长。
+- 系统提示段同步说明：批量任务应先向用户说明要做的几件事，再请一句授权。
+- `docs/social-preview.svg` / `.png`（1280×640）。
+
+### Fixed
+
+- R5 补上 `curl -F` / `--form`：同样是带 body 的 multipart 上传，此前不在外发规则里。
+- 授权解析用 `(?![a-z0-9])` 而不是 `\b`：中文后面没有 ASCII 词边界，`\b` 会导致「授权 5 分钟」解析失败。
+
+回归：`smoke 45/45`、`livecheck 20/20`。
+
 ## [1.1.1] — 2026-11-05
 
 文档与可用性补齐，外加两处**误拦**修正。

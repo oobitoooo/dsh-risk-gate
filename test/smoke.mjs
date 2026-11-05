@@ -18,7 +18,8 @@ fs.writeFileSync(path.join(home, 'small', 'b.txt'), 'x')
 fs.mkdirSync(path.join(home, 'big'), { recursive: true })
 for (let i = 0; i < 210; i += 1) fs.writeFileSync(path.join(home, 'big', `f${i}.txt`), 'x')
 
-const { apply } = await import('../lib/index.js')
+const mod = await import('../lib/index.js')
+const apply = mod.apply
 
 const handlers = new Map()
 const guards = []
@@ -133,6 +134,16 @@ const tricky = [
 ].join('\n')
 check('here-string 正文里的 @"…"@ 不会提前闭合', (await pre('pwsh', { command: tricky })).kind === 'allow')
 check('here-string 外的真命令仍然拦', (await pre('pwsh', { command: 'Remove-Item -Recurse -Force C:\\nope' })).kind === 'deny')
+
+// 授权窗口：一次确认覆盖系列任务
+await userSays('授权 5 分钟')
+check('授权窗口内 git push 放行', (await pre('pwsh', { command: 'git push origin main' })).kind === 'allow')
+check('授权窗口内删工作区外目录也放行', (await pre('pwsh', { command: 'Remove-Item -Recurse -Force C:\\Temp\\whatever' })).kind === 'allow')
+check('授权期间仍写审计（allow-by-grant）', fs.readFileSync(path.join(home, 'risk-gate', 'audit.jsonl'), 'utf8').includes('allow-by-grant'))
+await userSays('取消授权')
+check('取消授权后再次拦截', (await pre('pwsh', { command: 'git push origin main' })).kind === 'deny')
+check('授权时长上限 120 分钟', mod.parseGrant('授权 999 分钟').minutes === 120)
+check('普通文本不触发授权', mod.parseGrant('这次别授权').minutes === 0)
 check('写工作区放行', (await pre('write', { file_path: path.join(home, 'note.md'), content: 'x' })).kind === 'allow')
 check('链式拼接里夹带删除仍被拦', (await pre('pwsh', { command: 'git status; Remove-Item -Recurse .\\x' })).kind === 'deny')
 
