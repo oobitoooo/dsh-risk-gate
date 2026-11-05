@@ -6,19 +6,22 @@
       "id": "R1",
       "label": "递归删除 / 格式化文件",
       "flags": "i",
-      "pattern": "remove-item[^\\n]*-recurse|\\brm\\s+-rf\\b|\\brmdir\\s+/s|\\bdel\\s+/[fsq]|\\bformat-volume\\b|\\bclear-disk\\b|shutil\\.rmtree|\\bfs\\.(rm|rmdir)(sync)?\\s*\\(|rimraf"
+      "pattern": "remove-item[^\\n]*-recurse|\\brm\\s+-rf\\b|\\brmdir\\s+/s|\\bdel\\s+/[fsq]|\\bformat-volume\\b|\\bclear-disk\\b|shutil\\.rmtree|\\bfs\\.(rm|rmdir)(sync)?\\s*\\(|rimraf",
+      "risk": 8
     },
     {
       "id": "R2",
       "label": "写远端 / 改写仓库历史",
       "flags": "im",
-      "pattern": "\\bgit\\s+push\\b|\\bgit\\s+reset\\s+--hard\\b|\\bgit\\s+clean\\s+-[a-z]*f|\\bgit\\s+remote\\s+(add|remove|set-url)\\b|\\bgh\\s+release\\s+(create|delete)\\b"
+      "pattern": "\\bgit\\s+push\\b|\\bgit\\s+reset\\s+--hard\\b|\\bgit\\s+clean\\s+-[a-z]*f|\\bgit\\s+remote\\s+(add|remove|set-url)\\b|\\bgh\\s+release\\s+(create|delete)\\b",
+      "risk": 8
     },
     {
       "id": "R5",
       "label": "对外连接 / 数据外发 / 隧道",
       "flags": "i",
-      "pattern": "\\b(ssh|scp|sftp|plink|ncat|socat|chisel|frpc|ngrok)\\b|\\bnc\\s+-|invoke-webrequest[^\\n]*(-method\\s+(post|put)|-body)"
+      "pattern": "\\b(ssh|scp|sftp|plink|ncat|socat|chisel|frpc|ngrok)\\b|\\bnc\\s+-|invoke-webrequest[^\\n]*(-method\\s+(post|put)|-body)",
+      "risk": 9
     }
   ],
   "protectedRoots": [
@@ -40,5 +43,9 @@
     "^\\s*git\\s+(status|diff|log|show|branch|add|commit|fetch|switch)\\b",
     "^\\s*(ls|dir|pwd|cd)\\b",
     "^\\s*(get-content|get-childitem|select-string|test-path|get-item|get-process|get-service)\\b"
-  ]
+  ],
+  "thresholds": {
+    "block": 7,
+    "warn": 4
+  }
 }

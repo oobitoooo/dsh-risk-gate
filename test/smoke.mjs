@@ -160,6 +160,28 @@ await userSays('授权 3 分钟')
 handlers.get('agent/inbox/inserted')({ agent: { id: 'A1' }, message: { role: 'user', content: '授权 3 分钟' } })
 check('同一条消息只记一次授权', countGrants() - beforeGrant === 1)
 await userSays('取消授权') // 收尾：别让授权窗口影响后面的拦截用例
+
+// ---- 审计链 / 脱敏 / 风险分级（借鉴 dsh-guardwall、dsh-approval-gate） ----
+await pre('pwsh', { command: 'echo ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345; git push origin main' })
+const auditText = fs.readFileSync(auditPath, 'utf8')
+check('审计里不出现明文令牌', !auditText.includes('ABCDEFGHIJKLMNOPQRSTUVWXYZ012345'))
+check('令牌被替换成占位符', auditText.includes('ghp_***'))
+check('账号/密码类字段被脱敏', mod.redact('password=hunter2') === 'password=***')
+
+const chainKey = fs.readFileSync(path.join(home, 'risk-gate', 'chain.key'))
+const auditLines = auditText.trim().split('\n').filter(Boolean)
+const verified = mod.verifyAuditChain(auditLines, chainKey)
+check('审计链校验通过', verified.ok === true && verified.checked > 0, `checked=${verified.checked}`)
+const tampered = [...auditLines]
+tampered[tampered.length - 1] = tampered[tampered.length - 1].replace('"decision":"block"', '"decision":"allow"')
+const tamperCheck = mod.verifyAuditChain(tampered, chainKey)
+check('篡改任意一行会被检出', tamperCheck.ok === false)
+const wrongKey = mod.verifyAuditChain(auditLines, Buffer.from('0'.repeat(32)))
+check('换错密钥也会校验失败', wrongKey.ok === false)
+
+check('风险分级：高于阈值拦截', mod.riskDecision(9, { block: 7, warn: 4 }) === 'block')
+check('风险分级：中风险只告警', mod.riskDecision(5, { block: 7, warn: 4 }) === 'warn')
+check('风险分级：低风险只记录', mod.riskDecision(2, { block: 7, warn: 4 }) === 'observe')
 check('写工作区放行', (await pre('write', { file_path: path.join(home, 'note.md'), content: 'x' })).kind === 'allow')
 check('链式拼接里夹带删除仍被拦', (await pre('pwsh', { command: 'git status; Remove-Item -Recurse .\\x' })).kind === 'deny')
 

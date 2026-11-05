@@ -2,6 +2,28 @@
 
 All notable changes to this project. Format loosely follows Keep a Changelog; versions are semver.
 
+## [1.3.0] — 2026-11-05
+
+借鉴同期项目的三处设计（详见 [docs/CREDITS.md](docs/CREDITS.md)）。
+
+### Added
+
+- **HMAC 链式审计**（借鉴 dsh-guardwall）：`audit.jsonl` 每行带 `prev` / `h`，密钥 `chain.key`，每 20 行写 `chain.checkpoint.json`；`risk_gate action=verify` 可检出改行、换密钥、尾部截断。
+- **落盘前脱敏**（借鉴 dsh-guardwall）：`ghp_` / `github_pat_` / `sk-` / `AKIA` / `Bearer` / `password=` 等替换为占位符，命令里的凭据不会原样进日志。
+- **风险分级 + 阈值**（借鉴 dsh-guardwall 的 block/warn 与 dsh-approval-gate 的分级思路）：规则支持 `risk: 1–10`，`thresholds.block`（默认 7）/`thresholds.warn`（默认 4）；未达 block 的只写 `warn`/`observe` 不拦。
+- `risk_gate status` 增加 `thresholds` / `chainHead`；新增 `action=verify`。
+
+### Docs
+
+- 新增 `docs/CREDITS.md`，README 增加「致谢」；写明借鉴了谁、借了什么，以及**没借鉴什么及原因**（模型预判、确认制学习）。
+
+### 未采纳
+
+- 用模型预判「安全/危险」（dsh-approval-gate 的做法）：破甲环境下模型在环里，不应同时当裁判。
+- 「同一操作确认 N 次后自动放行」：与一次性编号语义冲突；改用显式「授权 N 分钟」。
+
+回归：`smoke 61/61`（新增 9 条：脱敏、链校验、篡改检出、错密钥、风险分级）、`livecheck 20/20`。
+
 ## [1.2.2] — 2026-11-05
 
 修 R2 的**结构性漏拦**：正则只认字面量 `git push`，而实际使用的 `& $git -C … push` 一次都没命中（审计里 R2 计数长期为 0）。

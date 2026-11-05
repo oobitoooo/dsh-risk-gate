@@ -154,7 +154,13 @@ AI：（接下来 30 分钟内，高危操作直接放行，逐条写进 audit.j
 | `allow[]` | 读类命令白名单，**只在命令没有链式拼接时生效** |
 | `ttlMs` | 编号有效期，默认 10 分钟 |
 
-其它产物：`risk-gate/audit.jsonl`（每次 block / allow-after-confirm，2 MB 轮转）、`risk-gate/boot.log`（启动阶段埋点）、`risk-gate/pending.json`、`risk-gate/last-user.json`。
+其它产物：`risk-gate/audit.jsonl`（每次 block / allow-after-confirm / warn，2 MB 轮转）、`risk-gate/boot.log`（启动阶段埋点）、`risk-gate/pending.json`、`risk-gate/last-user.json`。
+
+### 审计可验证、日志不含凭据
+
+- **HMAC 链式审计**：每行带 `prev` 与 `h`（HMAC-SHA256，密钥 `risk-gate/chain.key`），每 20 行落一次 `chain.checkpoint.json`。跑 `risk_gate action=verify` 能发现改行、换密钥、尾部截断。
+- **落盘前脱敏**：`ghp_` / `github_pat_` / `sk-` / `AKIA` / `Bearer …` / `password=…` 一律替换成占位符——命令里带着令牌，也不会原样进日志。
+- **风险分级**：规则可写 `risk: 1–10`，配 `thresholds.block`（默认 7）/ `thresholds.warn`（默认 4）。达到 block 才拦，中间只写 `warn`，更低只写 `observe`。
 
 ## 与 dsh-purge 的关系
 
@@ -207,8 +213,20 @@ powershell -ExecutionPolicy Bypass -File scripts\uninstall.ps1
 - **误报优先于漏报。** 宁可多问你一次。误报改 `policy.json`，不用改代码。
 - 编号只认**用户消息**；跨会话、子代理里的确认不通用。
 
+## 致谢
+
+本项目的三个设计直接借鉴了同期项目，细节与「借鉴了什么 / 没借鉴什么及原因」见 [docs/CREDITS.md](docs/CREDITS.md)：
+
+- **[dsh-guardwall](https://github.com/iiiweiii/dsh-guardwall)**（iiiweiii，MIT）——HMAC 链式审计 + checkpoint、`block/warn` 风险阈值、输出侧脱敏。这三条本版本已落地。
+- **[dsh-approval-gate](https://github.com/moon09300731/dsh-approval-gate)**（moon09300731，MIT）——「硬风险永远转人工、其余分级」的思路，落成本项目的 `risk` + 阈值；未采用其模型预判与「确认制学习」，原因见 CREDITS。
+- **[anthropics/claude-code](https://github.com/anthropics/claude-code)** 的 PreToolUse `permissionDecision` 协议，以及 [issue #39344](https://github.com/anthropics/claude-code/issues/39344)（`ask` 会静默覆盖 `deny`）——这正是本项目坚持 `deny` + 一次性凭据、而不是 `ask` 的依据。
+
+此外，[dsh-auto-approve](https://github.com/DNAlec/dsh-auto-approve)、[dsh-rule-engine](https://github.com/jilian-dsh/dsh-rule-engine)、[dsh-security-guard](https://github.com/bigclawd/dsh-security-guard)、[agent-guard](https://github.com/mokuyoaxis/agent-guard) 解决了相邻问题（关键词桶、AGENTS.md 硬拦、运行时拦截、可恢复快照），一并记在 CREDITS 里。
+
+上游：[dsh-purge](https://github.com/kingcharleslzy-ai/dsh-purge)（本插件是它的伴生护栏）与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。
+
 ## License
 
 MIT。见 [LICENSE](LICENSE)。
 
-本项目与 DeepSeek、dsh-purge 原作者均无隶属关系，是社区侧的独立补丁。
+本项目与 DeepSeek、dsh-purge 原作者均无隶属关系，是社区侧的独立补丁；未复制上述借鉴项目的源代码。
