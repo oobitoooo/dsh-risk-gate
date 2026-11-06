@@ -7,6 +7,7 @@ All notable changes to this project. Format loosely follows Keep a Changelog; ve
 ### Fixed
 
 - **尾部截断检不出来**：checkpoint 原先每 20 行才写一次，链很短时（例如刚装完只有几行）删掉末尾几条再校验仍是 `ok: true`。现在每写一条审计就更新 `chain.checkpoint.json`，`risk_gate action=verify` 会用 `truncated` 字段报出截断。
+- **`pending.json` 只增不减**：过期的待确认项从不清除（实测攒了 20 条死记录，最老的 43 小时）。现在每次持久化顺手剪掉超过 TTL 的条目，`risk_gate action=pending` 也只返回仍有效的。
 
 回归：`smoke 62/62`。
 
